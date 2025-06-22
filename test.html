@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guess the Number Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            margin-top: 50px;
+        }
+        .input-field {
+            margin: 20px 0;
+        }
+        .input-field input {
+            padding: 10px;
+            font-size: 16px;
+        }
+        .button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .leaderboard {
+            margin-top: 50px;
+        }
+        .leaderboard table {
+            margin: 0 auto;
+            border-collapse: collapse;
+        }
+        .leaderboard th, .leaderboard td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+        .leaderboard th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Guess the Number Game</h1>
+        <p>Guess a number between 1 and 100.</p>
+        <div class="input-field">
+            <input type="number" id="guessInput" placeholder="Enter your guess">
+        </div>
+        <button class="button" onclick="checkGuess()">Submit Guess</button>
+        <p id="message"></p>
+        <div class="leaderboard">
+            <h2>Leaderboard</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Name</th>
+                        <th>Score</th>
+                    </tr>
+                </thead>
+                <tbody id="leaderboardBody">
+                    <!-- Leaderboard entries will be inserted here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        let targetNumber = Math.floor(Math.random() * 100) + 1;
+        let attempts = 0;
+        let leaderboard = [];
+
+        function checkGuess() {
+            const guessInput = document.getElementById('guessInput');
+            const guess = parseInt(guessInput.value, 10);
+            const message = document.getElementById('message');
+
+            if (isNaN(guess) || guess < 1 || guess > 100) {
+                message.textContent = 'Please enter a valid number between 1 and 100.';
+                return;
+            }
+
+            attempts++;
+            if (guess === targetNumber) {
+                message.textContent = `Congratulations! You guessed the number in ${attempts} attempts.`;
+                saveScore(attempts);
+                resetGame();
+            } else if (guess < targetNumber) {
+                message.textContent = 'Too low! Try again.';
+            } else {
+                message.textContent = 'Too high! Try again.';
+            }
+        }
+
+        function saveScore(score) {
+            const name = prompt('Enter your name to save your score:');
+            if (name) {
+                leaderboard.push({ name, score });
+                leaderboard.sort((a, b) => a.score - b.score);
+                updateLeaderboard();
+                saveLeaderboardToLocalStorage();
+            }
+        }
+
+        function updateLeaderboard() {
+            const leaderboardBody = document.getElementById('leaderboardBody');
+            leaderboardBody.innerHTML = '';
+            leaderboard.forEach((entry, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `<td>${index + 1}</td><td>${entry.name}</td><td>${entry.score}</td>`;
+                leaderboardBody.appendChild(row);
+            });
+        }
+
+        function resetGame() {
+            targetNumber = Math.floor(Math.random() * 100) + 1;
+            attempts = 0;
+            document.getElementById('guessInput').value = '';
+            document.getElementById('message').textContent = '';
+        }
+
+        function saveLeaderboardToLocalStorage() {
+            localStorage.setItem('leaderboard', JSON.stringify(leaderboard));
+        }
+
+        function loadLeaderboardFromLocalStorage() {
+            const savedLeaderboard = localStorage.getItem('leaderboard');
+            if (savedLeaderboard) {
+                leaderboard = JSON.parse(savedLeaderboard);
+                updateLeaderboard();
+            }
+        }
+
+        // Load the leaderboard from local storage when the page loads
+        loadLeaderboardFromLocalStorage();
+    </script>
+</body>
+</html>
